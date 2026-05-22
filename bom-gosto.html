@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bom Gosto | Restaurante</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-principal: #0A0A0A;
+            --bg-card: #141414;
+            --vermelho: #E31B23;
+            --dourado: #FFD700;
+            --branco: #FFFFFF;
+            --cinza: #B0B0B0;
+            --header-transp: rgba(10,10,10,0.88);
+            /* Admin panel accent — alterável via admin */
+            --admin-accent: #E31B23;
+            --admin-bg: #08080e;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-principal);
+            color: var(--branco);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.65;
+        }
+
+        h1, h2, h3, .nav-link { font-family: 'Bebas Neue', cursive; letter-spacing: 2px; }
+        .elegant { font-family: 'Yellowtail', cursive; color: var(--dourado); text-transform: none; letter-spacing: 1px; }
+
+        /* === SPA === */
+        section { display: none; min-height: 80vh; animation: fadeUp 0.55s ease both; }
+        section.active { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            padding: 13px 30px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 3px;
+        }
+        .btn-primary { background: var(--vermelho); color: white; }
+        .btn-primary:hover { background: #c0151c; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(227,27,35,0.35); }
+        .btn-outline { border: 1.5px solid var(--dourado); color: var(--dourado); background: transparent; }
+        .btn-outline:hover { background: var(--dourado); color: black; transform: translateY(-2px); }
+
+        /* === HEADER === */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--header-transp);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 1rem 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            transition: padding 0.3s ease, background 0.3s ease;
+        }
+        header.scrolled { padding: 0.55rem 6%; background: rgba(0,0,0,0.97); }
+
+        .logo-wrap { display: flex; flex-direction: column; line-height: 1; }
+        .logo-wrap .logo-main { font-family: 'Bebas Neue', cursive; font-size: 1.9rem; color: var(--vermelho); letter-spacing: 3px; }
+        .logo-wrap .logo-sub  { font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 300; color: var(--cinza); letter-spacing: 4px; text-transform: uppercase; margin-top: 1px; }
+
+        nav ul { display: flex; list-style: none; gap: 2.2rem; }
+        nav a { color: var(--cinza); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 1.15rem; letter-spacing: 2px; cursor: pointer; transition: color 0.25s; position: relative; }
+        nav a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--vermelho); transition: width 0.3s ease; }
+        nav a:hover, nav a.active-link { color: var(--branco); }
+        nav a:hover::after, nav a.active-link::after { width: 100%; }
+
+        /* === HOME / HERO === */
+        #home { display: none; }
+        #home.active { display: flex; }
+        #home {
+            flex-direction: column;
+            min-height: 92vh;
+            background: linear-gradient(160deg, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 100%),
+                        url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1800') center/cover no-repeat;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+            position: relative;
+        }
+        #home::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(to top, var(--bg-principal), transparent);
+            pointer-events: none;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            border: 1px solid rgba(255,215,0,0.5);
+            color: var(--dourado);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            margin-bottom: 1.5rem;
+            border-radius: 2px;
+        }
+        .hero-title { font-size: clamp(3rem, 7vw, 6.5rem); line-height: 1; margin-bottom: 1.2rem; }
+        .hero-title .line-accent { color: var(--vermelho); }
+        .hero-sub { max-width: 520px; color: rgba(255,255,255,0.75); margin: 0 auto 2.5rem; font-size: 0.95rem; font-weight: 300; }
+        .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        /* Features strip */
+        .features-strip {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            padding: 0 6%;
+            margin-top: 5rem;
+            flex-wrap: wrap;
+        }
+        .feature-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            border: 1px solid #1f1f1f;
+            background: var(--bg-card);
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .feature-item:hover { border-color: var(--vermelho); background: #1a1010; }
+        .feature-item i { color: var(--dourado); font-size: 2rem; margin-bottom: 1rem; display: block; }
+        .feature-item h3 { font-size: 1.4rem; margin-bottom: 0.4rem; }
+        .feature-item p { font-size: 0.8rem; color: var(--cinza); }
+
+        /* Promo strip */
+        .promo-section {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 4rem;
+            overflow: hidden;
+        }
+        .promo-content { flex: 1; padding: 5rem 6%; min-width: 300px; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); }
+        .promo-content .promo-tag { font-size: 0.7rem; letter-spacing: 5px; text-transform: uppercase; color: var(--vermelho); font-weight: 700; margin-bottom: 1rem; }
+        .promo-content h3 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.05; margin-bottom: 1rem; }
+        .promo-content p { color: var(--cinza); font-size: 0.9rem; max-width: 380px; margin-bottom: 2rem; }
+        .promo-img { flex: 1; min-width: 300px; min-height: 380px; overflow: hidden; }
+        .promo-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; display: block; }
+        .promo-img:hover img { transform: scale(1.04); }
+
+        /* === SECTION HEADER === */
+        .section-header { text-align: center; padding: 5rem 5% 1rem; }
+        .section-header .elegant { font-size: 1.8rem; }
+        .section-header h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin-top: 0.3rem; }
+        .section-header p { color: var(--cinza); max-width: 520px; margin: 1rem auto 0; font-size: 0.9rem; }
+
+        .divider { width: 60px; height: 3px; background: var(--vermelho); margin: 1.2rem auto; }
+
+        /* === CARDÁPIO === */
+        .menu-cats {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 2rem 5% 0;
+            flex-wrap: wrap;
+        }
+        .menu-cat-btn {
+            padding: 8px 22px;
+            border: 1px solid #333;
+            background: transparent;
+            color: var(--cinza);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.25s;
+        }
+        .menu-cat-btn:hover, .menu-cat-btn.active { background: var(--vermelho); color: white; border-color: var(--vermelho); }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 1.5px;
+            padding: 3rem 0;
+            background: #111;
+        }
+        .card {
+            background: var(--bg-card);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.4s ease;
+            cursor: pointer;
+        }
+        .card:hover { transform: scale(1.02); z-index: 2; }
+        .card-img-wrap { overflow: hidden; position: relative; height: 260px; }
+        .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .card-img-wrap img { transform: scale(1.07); }
+        .card-img-wrap::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, var(--bg-card), transparent); }
+
+        .price-tag {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--vermelho);
+            padding: 4px 14px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            border-radius: 2px;
+            z-index: 2;
+        }
+        .card-body { padding: 1.5rem 1.8rem 2rem; }
+        .card-body h3 { font-size: 1.9rem; margin-bottom: 0.5rem; }
+        .card-body p { font-size: 0.82rem; color: var(--cinza); line-height: 1.7; margin-bottom: 1.5rem; }
+
+        /* Admin delete button on cards */
+        .card-admin-del {
+            display: none;
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            transition: all 0.2s;
+        }
+        .card-admin-del:hover { background: #ff4444; color: white; }
+        body.admin-active .card-admin-del { display: flex; }
+
+        /* === SOBRE === */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 5rem;
+            padding: 6rem 8%;
+        }
+        .image-container { position: relative; }
+        .image-container img { width: 100%; border-radius: 4px; display: block; filter: brightness(0.92); }
+        .badge-since {
+            position: absolute;
+            bottom: -22px;
+            right: -22px;
+            background: var(--dourado);
+            color: #000;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.3;
+            box-shadow: 0 0 0 6px var(--bg-principal);
+        }
+        .text-content .elegant { font-size: 1.6rem; }
+        .text-content h1 { font-size: clamp(2.5rem, 4vw, 3.5rem); line-height: 1.05; margin: 0.4rem 0 1.2rem; }
+        .text-content p { color: var(--cinza); font-size: 0.9rem; max-width: 450px; }
+        .stats { display: flex; gap: 3rem; margin-top: 2.5rem; flex-wrap: wrap; }
+        .stat-item h2 { font-family: 'Bebas Neue', cursive; font-size: 2.8rem; color: var(--vermelho); }
+        .stat-item p { font-size: 0.75rem; color: var(--cinza); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* === DELIVERY === */
+        #delivery.active { display: flex; flex-direction: column; }
+        #delivery {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 10%;
+            background: radial-gradient(ellipse at center, #1a0a0a 0%, var(--bg-principal) 70%);
+        }
+        .delivery-icon { font-size: 4.5rem; color: var(--vermelho); margin-bottom: 1.5rem; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        #delivery h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 0.8rem; }
+        #delivery p { color: var(--cinza); max-width: 480px; font-size: 0.9rem; }
+        .delivery-btns { display: flex; justify-content: center; gap: 1.2rem; margin: 2.5rem 0; flex-wrap: wrap; }
+        .delivery-time { color: var(--dourado); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+
+        /* === RESERVAS === */
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            padding: 5rem 8%;
+            align-items: start;
+        }
+        .booking-info .elegant { font-size: 1.5rem; }
+        .booking-info h1 { font-size: clamp(2.5rem, 4vw, 3.5rem); line-height: 1; margin: 0.4rem 0 1.5rem; }
+        .booking-features { list-style: none; }
+        .booking-features li { display: flex; align-items: center; gap: 12px; padding: 0.8rem 0; border-bottom: 1px solid #1d1d1d; font-size: 0.88rem; color: var(--cinza); }
+        .booking-features li i { color: var(--vermelho); width: 16px; }
+
+        form { background: var(--bg-card); padding: 2.5rem; border-radius: 4px; border: 1px solid #1f1f1f; }
+        .form-group { margin-bottom: 1.4rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cinza); }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            color: white;
+            border-radius: 3px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        input:focus, select:focus { border-color: var(--vermelho); }
+        select option { background: #111; }
+        .form-row { display: flex; gap: 1rem; }
+        .form-row .form-group { flex: 1; }
+
+        /* === CONTATO === */
+        .contact-layout { padding: 4rem 8%; }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: #1a1a1a;
+            margin-bottom: 1px;
+        }
+        .contact-card {
+            background: var(--bg-card);
+            text-align: center;
+            padding: 3rem 1.5rem;
+            transition: background 0.3s;
+        }
+        .contact-card:hover { background: #1a1010; }
+        .contact-card i { color: var(--dourado); font-size: 1.8rem; margin-bottom: 1.2rem; display: block; }
+        .contact-card h3 { font-size: 1.3rem; margin-bottom: 0.8rem; }
+        .contact-card p { color: var(--cinza); font-size: 0.85rem; line-height: 1.9; }
+        .map-wrap {
+            background: #111;
+            border: 1px solid #1f1f1f;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: var(--cinza);
+            font-size: 0.85rem;
+            margin-top: 1px;
+        }
+        .map-wrap i { font-size: 2rem; color: var(--vermelho); }
+
+        /* === FOOTER === */
+        footer {
+            text-align: center;
+            padding: 4rem 5%;
+            border-top: 1px solid #1a1a1a;
+            background: #050505;
+        }
+        .footer-logo { font-family: 'Bebas Neue', cursive; font-size: 2.2rem; color: var(--vermelho); letter-spacing: 4px; }
+        .footer-tagline { font-size: 0.7rem; letter-spacing: 5px; color: var(--cinza); text-transform: uppercase; margin-top: 4px; margin-bottom: 2rem; }
+        .social-links { display: flex; justify-content: center; gap: 1.2rem; margin-bottom: 2rem; }
+        .social-links a { color: #444; font-size: 1.3rem; transition: color 0.3s, transform 0.3s; display: inline-flex; }
+        .social-links a:hover { color: var(--vermelho); transform: translateY(-3px); }
+        .footer-copy { font-size: 0.72rem; color: #444; }
+        .footer-xtack { font-size: 0.65rem; color: #333; margin-top: 8px; letter-spacing: 3px; text-transform: uppercase; }
+
+        /* === WHATSAPP === */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: #25d366;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 4px 20px rgba(37,211,102,0.35);
+            z-index: 999;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(37,211,102,0.5); }
+
+        /* ================================================================
+           ADMIN SYSTEM — PAINEL DE SEGURANÇA
+        ================================================================ */
+
+        /* Gatilho invisível */
+        #admin-trigger {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 28px; height: 28px;
+            z-index: 9997;
+            cursor: default;
+            opacity: 0;
+        }
+
+        /* Login overlay */
+        #admin-login {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.96);
+            backdrop-filter: blur(16px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+        }
+        #admin-login.show { display: flex; }
+
+        .login-box {
+            background: #0d0d18;
+            border: 1px solid rgba(227,27,35,0.25);
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+            width: 340px;
+            position: relative;
+            text-align: center;
+        }
+        .login-box h3 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            letter-spacing: 4px;
+            color: var(--vermelho);
+            margin-bottom: 0.3rem;
+        }
+        .login-box > p { font-size: 0.75rem; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.8rem; }
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #111;
+            border: 1px solid #222;
+            color: white;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            margin-bottom: 1rem;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .login-box input:focus { border-color: var(--vermelho); }
+        .login-box .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--vermelho);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-box .login-btn:hover { background: #c0151c; }
+        .login-close {
+            position: absolute;
+            top: 12px; right: 14px;
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .login-close:hover { color: white; }
+        #login-err { color: #ff5555; font-size: 0.78rem; margin-top: -0.5rem; margin-bottom: 0.8rem; display: none; }
+
+        /* Admin overlay */
+        #admin-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9996;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        #admin-overlay.show { opacity: 1; pointer-events: all; }
+
+        /* Admin panel */
+        #admin-panel {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 460px;
+            height: 100vh;
+            background: var(--admin-bg);
+            border-left: 1px solid rgba(227,27,35,0.15);
+            overflow-y: auto;
+            z-index: 9997;
+            transition: right 0.4s cubic-bezier(.4,0,.2,1);
+            padding: 0;
+        }
+        #admin-panel.open { right: 0; }
+        #admin-panel::-webkit-scrollbar { width: 4px; }
+        #admin-panel::-webkit-scrollbar-track { background: #0a0a0a; }
+        #admin-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        .ap-header {
+            padding: 1.5rem 1.8rem 1.2rem;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--admin-bg);
+            z-index: 2;
+        }
+        .ap-header-left { display: flex; align-items: center; gap: 10px; }
+        .ap-header-left i { color: var(--admin-accent); font-size: 1.1rem; }
+        .ap-header h2 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            color: white;
+        }
+        .ap-header-sub { font-size: 0.65rem; color: #444; letter-spacing: 2px; text-transform: uppercase; }
+        .ap-close {
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .ap-close:hover { color: white; }
+
+        .ap-body { padding: 1.5rem 1.8rem; }
+
+        .ap-section {
+            margin-bottom: 2rem;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .ap-section-title {
+            background: #111;
+            padding: 0.8rem 1.2rem;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: var(--admin-accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ap-section-body { padding: 1.2rem; }
+
+        /* Color accent selector */
+        .accent-colors { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+        .accent-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .accent-dot:hover { transform: scale(1.15); }
+        .accent-dot.selected { border-color: white; transform: scale(1.15); }
+
+        /* Color picker row */
+        .color-row { display: flex; gap: 10px; align-items: center; margin-bottom: 0.8rem; }
+        .color-row label { font-size: 0.72rem; color: #666; letter-spacing: 1px; text-transform: uppercase; min-width: 90px; }
+        .color-row input[type="color"] {
+            width: 42px; height: 34px;
+            padding: 2px;
+            background: #111;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .color-val { font-size: 0.75rem; color: #555; font-family: monospace; }
+
+        /* Admin input styles */
+        .ap-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #111;
+            border: 1px solid #222;
+            color: white;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.83rem;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 0.8rem;
+        }
+        .ap-input:focus { border-color: var(--admin-accent); }
+        .ap-label { font-size: 0.68rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+        .ap-btn {
+            padding: 9px 18px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ap-btn-primary { background: var(--admin-accent); color: white; }
+        .ap-btn-primary:hover { filter: brightness(1.15); }
+        .ap-btn-danger { background: transparent; border: 1px solid #ff4444; color: #ff4444; }
+        .ap-btn-danger:hover { background: #ff4444; color: white; }
+        .ap-btn-ghost { background: #1a1a1a; color: #aaa; }
+        .ap-btn-ghost:hover { background: #222; color: white; }
+
+        /* Menu CRUD */
+        .menu-form { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 6px; padding: 1.2rem; margin-bottom: 1.2rem; }
+        .upload-area {
+            border: 2px dashed #2a2a2a;
+            border-radius: 6px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            position: relative;
+            margin-bottom: 0.8rem;
+        }
+        .upload-area:hover { border-color: var(--admin-accent); }
+        .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .upload-area i { font-size: 1.8rem; color: #333; display: block; margin-bottom: 0.5rem; }
+        .upload-area p { font-size: 0.75rem; color: #555; }
+        .upload-preview {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.8rem;
+            display: none;
+        }
+
+        /* Menu list in admin */
+        .admin-menu-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+        .admin-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #111;
+            border: 1px solid #1e1e1e;
+            border-radius: 4px;
+            padding: 8px 10px;
+        }
+        .admin-menu-item img { width: 48px; height: 40px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+        .admin-menu-item-info { flex: 1; min-width: 0; }
+        .admin-menu-item-info strong { display: block; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-menu-item-info span { font-size: 0.72rem; color: #555; }
+        .admin-menu-item-del {
+            background: none;
+            border: 1px solid #ff444444;
+            color: #ff6666;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .admin-menu-item-del:hover { background: #ff4444; color: white; border-color: #ff4444; }
+
+        /* Toast */
+        #ap-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+            z-index: 99999;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #ap-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Logout row */
+        .ap-logout-row { padding: 1rem 1.8rem; border-top: 1px solid #111; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 900px) {
+            header { flex-wrap: wrap; gap: 0.8rem; padding: 0.8rem 4%; }
+            nav ul { gap: 1.2rem; }
+            .split-layout, .booking-container { grid-template-columns: 1fr; gap: 2.5rem; }
+            .image-container { order: -1; }
+            .badge-since { right: 10px; bottom: 10px; }
+            header .btn { display: none; }
+            #admin-panel { width: 100%; right: -100%; }
+        }
+        @media (max-width: 600px) {
+            nav ul { gap: 0.8rem; }
+            nav a { font-size: 0.95rem; }
+            .split-layout, .booking-container { padding: 3rem 5%; }
+            .promo-content { padding: 3rem 5%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="logo-wrap">
+            <span class="logo-main">Bom Gosto</span>
+            <span class="logo-sub">Restaurante &amp; Sabores</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a onclick="showSection('home')" class="nav-link active-link">Home</a></li>
+                <li><a onclick="showSection('cardapio')" class="nav-link">Cardápio</a></li>
+                <li><a onclick="showSection('sobre')" class="nav-link">Sobre</a></li>
+                <li><a onclick="showSection('reservas')" class="nav-link">Reservas</a></li>
+                <li><a onclick="showSection('contato')" class="nav-link">Contato</a></li>
+            </ul>
+        </nav>
+        <button class="btn btn-primary" onclick="showSection('delivery')">
+            <i class="fas fa-motorcycle"></i> Pedir Agora
+        </button>
+    </header>
+
+    <!-- ===== HOME ===== -->
+    <section id="home" class="active">
+        <div class="hero-tag">Sabores Autênticos · Inhambane, Moçambique</div>
+        <h1 class="hero-title">
+            O Melhor da<br>
+            <span class="line-accent">Gastronomia</span> Local
+        </h1>
+        <p class="hero-sub">Pratos preparados com ingredientes frescos, receitas tradicionais e todo o carinho de quem ama cozinhar. Um ambiente calmo e acolhedor no coração de Inhambane.</p>
+        <div class="hero-cta">
+            <button class="btn btn-primary" onclick="showSection('cardapio')">
+                <i class="fas fa-utensils"></i> Ver Cardápio
+            </button>
+            <button class="btn btn-outline" onclick="showSection('reservas')">
+                <i class="fas fa-calendar-alt"></i> Reservar Mesa
+            </button>
+        </div>
+
+        <div class="features-strip">
+            <div class="feature-item">
+                <i class="fas fa-leaf"></i>
+                <h3>Ingredientes Frescos</h3>
+                <p>Produtos locais selecionados diariamente para o melhor sabor.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-hat-chef"></i>
+                <h3>Chef Experiente</h3>
+                <p>Receitas tradicionais com toque criativo e muito amor.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-star"></i>
+                <h3>4.2 ★ no Google</h3>
+                <p>Elogiado pela limpeza, ambiente calmo e sabor da comida.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-motorcycle"></i>
+                <h3>Delivery Rápido</h3>
+                <p>Receba em casa com a mesma qualidade e sabor do restaurante.</p>
+            </div>
+        </div>
+
+        <div class="promo-section">
+            <div class="promo-content">
+                <p class="promo-tag">Destaque do Cardápio</p>
+                <h3>Cabrito Estufado<br>com Arroz de Cenoura</h3>
+                <p>Um dos pratos mais pedidos da casa — cabrito estufado lentamente, servido com salada fresca e arroz de cenoura. Uma experiência que fica na memória.</p>
+                <button class="btn btn-primary" onclick="showSection('cardapio')">Ver Cardápio Completo</button>
+            </div>
+            <div class="promo-img">
+                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=900" alt="Prato especial">
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CARDÁPIO ===== -->
+    <section id="cardapio">
+        <div class="section-header">
+            <span class="elegant">Feito com Amor</span>
+            <div class="divider"></div>
+            <h1>Nosso Cardápio</h1>
+            <p>Cada prato preparado na hora, com ingredientes frescos e receitas que aquecem a alma.</p>
+        </div>
+
+        <div class="menu-grid" id="menu-grid">
+            <!-- Items gerados pelo JS -->
+        </div>
+    </section>
+
+    <!-- ===== SOBRE ===== -->
+    <section id="sobre">
+        <div class="split-layout">
+            <div class="image-container">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=80&w=800" alt="Restaurante Bom Gosto">
+                <div class="badge-since">Feito<br>com<br>Amor</div>
+            </div>
+            <div class="text-content">
+                <span class="elegant">A Nossa História</span>
+                <h1>Sabor que Reúne Pessoas</h1>
+                <p>O Bom Gosto nasceu de uma paixão simples: cozinhar bem e receber melhor. Localizado na Rua Vladmir Lenine, Balane 2, em Inhambane, é reconhecido por oferecer um ambiente calmo e pratos bem servidos.</p>
+                <p style="margin-top: 1rem;">Seja para uma refeição rápida ao almoço ou um jantar tranquilo, a nossa missão é sempre a mesma: fazer o cliente sentir-se em casa, com um prato honesto e cheio de sabor.</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <h2>4.2★</h2>
+                        <p>Avaliação Google</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2>+8k</h2>
+                        <p>Clientes Satisfeitos</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2>7 dias</h2>
+                        <p>Por semana</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DELIVERY ===== -->
+    <section id="delivery">
+        <div class="delivery-icon"><i class="fas fa-motorcycle"></i></div>
+        <h1>Receba em Casa</h1>
+        <p>A mesma qualidade do restaurante, embalada com cuidado e entregue rapidamente até a sua porta. Peça agora via WhatsApp!</p>
+        <div class="delivery-btns">
+            <a href="https://wa.me/258850268545" class="btn btn-primary" style="background:#25d366;" target="_blank">
+                <i class="fab fa-whatsapp"></i> Pedir via WhatsApp
+            </a>
+        </div>
+        <p class="delivery-time"><i class="far fa-clock"></i> Tempo médio: 30 – 45 minutos</p>
+    </section>
+
+    <!-- ===== RESERVAS ===== -->
+    <section id="reservas">
+        <div class="booking-container">
+            <div class="booking-info">
+                <span class="elegant">Reserve a sua mesa</span>
+                <h1>Momentos Inesquecíveis</h1>
+                <ul class="booking-features">
+                    <li><i class="fas fa-wind"></i> Espaço climatizado e confortável</li>
+                    <li><i class="fas fa-beer"></i> Cerveja gelada e carta de bebidas</li>
+                    <li><i class="fas fa-pizza-slice"></i> Pizza, grelhados e muito mais</li>
+                    <li><i class="fas fa-child"></i> Ambiente familiar e acolhedor</li>
+                    <li><i class="fas fa-parking"></i> Estacionamento disponível</li>
+                </ul>
+            </div>
+            <form onsubmit="handleBooking(event)">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" placeholder="Ex: João Machava" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="tel" placeholder="+258 85 000-0000" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horário</label>
+                        <select>
+                            <option>08:00</option>
+                            <option>09:00</option>
+                            <option>10:00</option>
+                            <option>11:00</option>
+                            <option>12:00</option>
+                            <option>13:00</option>
+                            <option>14:00</option>
+                            <option>18:00</option>
+                            <option>19:00</option>
+                            <option selected>20:00</option>
+                            <option>20:45</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Número de Pessoas</label>
+                    <select>
+                        <option>1 Pessoa</option>
+                        <option>2 Pessoas</option>
+                        <option>3 Pessoas</option>
+                        <option selected>4 Pessoas</option>
+                        <option>5 Pessoas</option>
+                        <option>6 Pessoas</option>
+                        <option>Mais de 6</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Observações (opcional)</label>
+                    <textarea rows="3" placeholder="Ex: Aniversário, alergias, cadeirante..." style="resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; font-size:1rem;">
+                    <i class="fas fa-check"></i> Confirmar Disponibilidade
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ===== CONTATO ===== -->
+    <section id="contato">
+        <div class="section-header">
+            <span class="elegant">Fale Connosco</span>
+            <div class="divider"></div>
+            <h1>Onde Nos Encontrar</h1>
+        </div>
+        <div class="contact-layout">
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Endereço</h3>
+                    <p>Rua Vladmir Lenine<br>Balane 2, Inhambane<br>Moçambique</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>Telefone / WhatsApp</h3>
+                    <p>+258 85 026 8545<br>Disponível todos os dias<br>das 08h às 23h (Sex/Sáb)</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Horários</h3>
+                    <p>
+                        Segunda: 08:00 – 20:45<br>
+                        Ter–Qui &amp; Dom: 08:00 – 21:00<br>
+                        <span style="color:#E31B23">Sex &amp; Sáb: 08:00 – 23:00</span>
+                    </p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-star"></i>
+                    <h3>Avaliação</h3>
+                    <p>4.2 ★ no Google<br>Elogiado pela limpeza<br>e sabor da comida</p>
+                </div>
+            </div>
+            <div class="map-wrap">
+                <i class="fas fa-map-marked-alt"></i>
+                <p>Rua Vladmir Lenine, Balane 2 — Inhambane, Moçambique</p>
+                <button class="btn btn-outline" style="font-size:0.85rem; padding: 8px 20px;" onclick="window.open('https://www.google.com/maps/search/Bom+Gosto+Restaurante+Inhambane+Mozambique','_blank')">
+                    Abrir no Google Maps
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-logo">Bom Gosto</div>
+        <div class="footer-tagline">Restaurante &amp; Sabores · Inhambane</div>
+        <div class="social-links">
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/258850268545" aria-label="WhatsApp" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <p class="footer-copy">© 2026 Bom Gosto Lda. Todos os direitos reservados.</p>
+        <p class="footer-xtack">✦ XTACK OFICIAL ✦</p>
+        <!-- Gatilho secreto no footer -->
+        <div id="footer-admin-trigger" style="display:inline-block;width:20px;height:20px;opacity:0;cursor:default;"></div>
+    </footer>
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/258850268545" class="whatsapp-float" aria-label="WhatsApp" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Gatilho secreto canto inferior esquerdo -->
+    <div id="admin-trigger"></div>
+
+    <!-- ===== LOGIN ADMIN ===== -->
+    <div id="admin-login">
+        <div class="login-box">
+            <button class="login-close" onclick="closeAdminLogin()">✕</button>
+            <h3>ADMIN</h3>
+            <p>Acesso restrito · Bom Gosto</p>
+            <input type="password" id="admin-pass" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter') checkLogin()">
+            <p id="login-err">Senha incorrecta. Tente novamente.</p>
+            <button class="login-btn" onclick="checkLogin()"><i class="fas fa-lock"></i> Entrar</button>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN OVERLAY ===== -->
+    <div id="admin-overlay" onclick="closeAdmin()"></div>
+
+    <!-- ===== PAINEL ADMIN ===== -->
+    <div id="admin-panel">
+        <div class="ap-header">
+            <div class="ap-header-left">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <h2>Painel Admin</h2>
+                    <div class="ap-header-sub">Bom Gosto Lda</div>
+                </div>
+            </div>
+            <button class="ap-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="ap-body">
+
+            <!-- SEÇÃO: COR DO PAINEL -->
+            <div class="ap-section">
+                <div class="ap-section-title"><i class="fas fa-palette"></i> Cor do Painel Admin</div>
+                <div class="ap-section-body">
+                    <p style="font-size:0.75rem;color:#555;margin-bottom:1rem;">Escolhe a cor de destaque do painel de administração.</p>
+                    <div class="accent-colors" id="accent-colors">
+                        <div class="accent-dot selected" style="background:#E31B23" data-color="#E31B23" onclick="setAdminAccent('#E31B23',this)" title="Vermelho"></div>
+                        <div class="accent-dot" style="background:#FFD700" data-color="#FFD700" onclick="setAdminAccent('#FFD700',this)" title="Dourado"></div>
+                        <div class="accent-dot" style="background:#00ffaa" data-color="#00ffaa" onclick="setAdminAccent('#00ffaa',this)" title="Verde Neon"></div>
+                        <div class="accent-dot" style="background:#00aaff" data-color="#00aaff" onclick="setAdminAccent('#00aaff',this)" title="Azul Neon"></div>
+                        <div class="accent-dot" style="background:#aa55ff" data-color="#aa55ff" onclick="setAdminAccent('#aa55ff',this)" title="Roxo"></div>
+                        <div class="accent-dot" style="background:#ff8800" data-color="#ff8800" onclick="setAdminAccent('#ff8800',this)" title="Laranja"></div>
+                    </div>
+                    <div class="color-row">
+                        <label>Personalizada</label>
+                        <input type="color" id="cp-accent" value="#E31B23"
+                            oninput="setAdminAccent(this.value,null);document.getElementById('cp-accent-val').textContent=this.value;">
+                        <span class="color-val" id="cp-accent-val">#E31B23</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO: IMAGEM DO PAINEL -->
+            <div class="ap-section">
+                <div class="ap-section-title"><i class="fas fa-image"></i> Imagem de Destaque (Home)</div>
+                <div class="ap-section-body">
+                    <p style="font-size:0.75rem;color:#555;margin-bottom:0.8rem;">Substitui a imagem promocional na secção Home.</p>
+                    <div class="upload-area" id="hero-upload-area">
+                        <input type="file" accept="image/*" onchange="previewPromoImg(event)">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Clica ou arrasta uma imagem aqui</p>
+                    </div>
+                    <img id="promo-img-preview" class="upload-preview" alt="Preview">
+                    <div style="display:flex;gap:8px;">
+                        <button class="ap-btn ap-btn-primary" onclick="applyPromoImg()"><i class="fas fa-check"></i> Aplicar</button>
+                        <button class="ap-btn ap-btn-ghost" onclick="clearPromoImg()"><i class="fas fa-undo"></i> Repor</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO: ADICIONAR PRATO AO CARDÁPIO -->
+            <div class="ap-section">
+                <div class="ap-section-title"><i class="fas fa-plus-circle"></i> Adicionar Prato ao Cardápio</div>
+                <div class="ap-section-body">
+                    <div class="menu-form">
+                        <div class="upload-area" id="dish-upload-area">
+                            <input type="file" accept="image/*,application/pdf" onchange="previewDishImg(event)">
+                            <i class="fas fa-utensils"></i>
+                            <p>Foto do prato ou documento (imagem / PDF)</p>
+                        </div>
+                        <img id="dish-img-preview" class="upload-preview" alt="Preview prato">
+
+                        <span class="ap-label">Nome do Prato</span>
+                        <input type="text" id="dish-name" class="ap-input" placeholder="Ex: Hambúrguer Completo">
+
+                        <span class="ap-label">Descrição</span>
+                        <textarea id="dish-desc" class="ap-input" rows="2" placeholder="Ex: Hambúrguer com batata frita, alface e molho especial" style="resize:vertical;"></textarea>
+
+                        <span class="ap-label">Preço (MT)</span>
+                        <input type="text" id="dish-price" class="ap-input" placeholder="Ex: 350 MT">
+
+                        <button class="ap-btn ap-btn-primary" style="width:100%;justify-content:center;" onclick="addDishToMenu()">
+                            <i class="fas fa-plus"></i> Adicionar ao Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO: GERIR CARDÁPIO -->
+            <div class="ap-section">
+                <div class="ap-section-title"><i class="fas fa-list-ul"></i> Gerir Pratos do Cardápio</div>
+                <div class="ap-section-body">
+                    <div class="admin-menu-list" id="admin-menu-list">
+                        <!-- preenchido pelo JS -->
+                    </div>
+                    <p id="admin-menu-empty" style="font-size:0.78rem;color:#444;text-align:center;padding:1rem 0;display:none;">Nenhum prato adicionado ainda.</p>
+                </div>
+            </div>
+
+        </div><!-- /ap-body -->
+
+        <div class="ap-logout-row">
+            <button class="ap-btn ap-btn-danger" style="width:100%;justify-content:center;" onclick="logoutAdmin()">
+                <i class="fas fa-sign-out-alt"></i> Terminar Sessão
+            </button>
+        </div>
+    </div><!-- /admin-panel -->
+
+    <!-- Toast -->
+    <div id="ap-toast"></div>
+
+    <script>
+    /* ================================================================
+       CONFIGURAÇÕES & ESTADO
+    ================================================================ */
+    const ADMIN_PASS = 'bomgosto2026';
+    let adminLoggedIn = false;
+
+    /* ================================================================
+       CARDÁPIO — DADOS PADRÃO
+    ================================================================ */
+    const DEFAULT_MENU = [
+        {
+            id: 'default_1',
+            name: 'Hambúrguer Completo com Batata',
+            desc: 'Hambúrguer suculento com alface, tomate, queijo e molho especial da casa. Acompanha batata frita crocante.',
+            price: '350 MT',
+            img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=700'
+        },
+        {
+            id: 'default_2',
+            name: 'Cabrito Estufado',
+            desc: 'Cabrito estufado lentamente com especiarias, servido com salada fresca e arroz de cenoura.',
+            price: '520 MT',
+            img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=700'
+        },
+        {
+            id: 'default_3',
+            name: 'Camarão ao Alho',
+            desc: 'Camarão fresco salteado com alho, azeite e limão. Acompanha arroz branco e pão artesanal.',
+            price: '480 MT',
+            img: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?auto=format&fit=crop&q=80&w=700'
+        },
+        {
+            id: 'default_4',
+            name: 'Peixe Grelhado do Dia',
+            desc: 'Peixe fresco grelhado inteiro com temperos da casa, mandioca cozida e molho de tomate caseiro.',
+            price: '520 MT',
+            img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=700'
+        },
+        {
+            id: 'default_5',
+            name: 'Bife à Casa',
+            desc: 'Bife de vaca grelhado com molho especial, batata frita crocante, ovo a cavalo e salada.',
+            price: '420 MT',
+            img: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&q=80&w=700'
+        },
+        {
+            id: 'default_6',
+            name: 'Sopa Tradicional',
+            desc: 'Sopa encorpada com legumes da época, carne desfiada e temperos tradicionais. Com pão de centeio.',
+            price: '290 MT',
+            img: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=700'
+        }
+    ];
+
+    let MENU_ITEMS = [];
+
+    /* ================================================================
+       PERSISTÊNCIA localStorage
+    ================================================================ */
+    function saveData(key, val) {
+        try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch(e){}
+    }
+    function loadData(key) {
+        try { return localStorage.getItem(key); } catch(e){ return null; }
+    }
+
+    function loadSettings() {
+        // Cardápio
+        const saved = loadData('bomgosto_menu');
+        if (saved) {
+            try { MENU_ITEMS = JSON.parse(saved); } catch(e) { MENU_ITEMS = [...DEFAULT_MENU]; }
+        } else {
+            MENU_ITEMS = [...DEFAULT_MENU];
+        }
+
+        // Cor do painel admin
+        const accent = loadData('bomgosto_admin_accent');
+        if (accent) applyAdminAccentDirect(accent);
+
+        // Imagem promo
+        const promoImg = loadData('bomgosto_promo_img');
+        if (promoImg) {
+            const pi = document.querySelector('.promo-img img');
+            if (pi) pi.src = promoImg;
+        }
+
+        renderMenuGrid();
+    }
+
+    /* ================================================================
+       NAVEGAÇÃO SPA
+    ================================================================ */
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const headerEl = document.getElementById('main-header');
+
+    function showSection(id) {
+        sections.forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.remove('active');
+            void target.offsetWidth;
+            target.classList.add('active');
+        }
+        navLinks.forEach(l => {
+            l.classList.remove('active-link');
+            const fn = l.getAttribute('onclick') || '';
+            if (fn.includes(`'${id}'`)) l.classList.add('active-link');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (id === 'cardapio') renderMenuGrid();
+    }
+
+    window.addEventListener('scroll', () => {
+        headerEl.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    function handleBooking(e) {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-check"></i> Reserva Enviada!';
+            btn.style.background = '#25d366';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Confirmar Disponibilidade';
+                btn.style.background = '';
+                btn.disabled = false;
+                e.target.reset();
+            }, 3000);
+        }, 1500);
+    }
+
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const today = new Date().toISOString().split('T')[0];
+    dateInputs.forEach(i => i.setAttribute('min', today));
+
+    /* ================================================================
+       CARDÁPIO — RENDER
+    ================================================================ */
+    function renderMenuGrid() {
+        const grid = document.getElementById('menu-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        if (MENU_ITEMS.length === 0) {
+            grid.innerHTML = '<div style="padding:3rem;text-align:center;color:#555;grid-column:1/-1;">Nenhum prato disponível no momento.</div>';
+            return;
+        }
+
+        MENU_ITEMS.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.id = item.id;
+            card.innerHTML = `
+                <button class="card-admin-del" title="Remover prato" onclick="removeDish('${item.id}');event.stopPropagation();">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <span class="price-tag">${escHtml(item.price)}</span>
+                <div class="card-img-wrap">
+                    <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy"
+                         onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=700'">
+                </div>
+                <div class="card-body">
+                    <h3>${escHtml(item.name)}</h3>
+                    <p>${escHtml(item.desc)}</p>
+                    <button class="btn btn-outline" style="width:100%;">Adicionar ao Pedido</button>
+                </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderAdminMenuList() {
+        const list = document.getElementById('admin-menu-list');
+        const empty = document.getElementById('admin-menu-empty');
+        if (!list) return;
+        list.innerHTML = '';
+
+        if (MENU_ITEMS.length === 0) {
+            if (empty) empty.style.display = 'block';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        MENU_ITEMS.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'admin-menu-item';
+            el.innerHTML = `
+                <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}"
+                     onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=100'">
+                <div class="admin-menu-item-info">
+                    <strong>${escHtml(item.name)}</strong>
+                    <span>${escHtml(item.price)}</span>
+                </div>
+                <button class="admin-menu-item-del" onclick="removeDish('${item.id}')" title="Remover">
+                    <i class="fas fa-trash"></i>
+                </button>`;
+            list.appendChild(el);
+        });
+    }
+
+    /* ================================================================
+       CARDÁPIO — CRUD
+    ================================================================ */
+    let pendingDishImg = '';
+
+    function previewDishImg(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Se for PDF, mostra placeholder
+        if (file.type === 'application/pdf') {
+            pendingDishImg = '';
+            const preview = document.getElementById('dish-img-preview');
+            preview.style.display = 'none';
+            showToast('PDF recebido — preenche os campos abaixo');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+            pendingDishImg = ev.target.result;
+            const preview = document.getElementById('dish-img-preview');
+            preview.src = pendingDishImg;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function addDishToMenu() {
+        if (!adminLoggedIn) { showToast('Acesso restrito.'); return; }
+
+        const name  = document.getElementById('dish-name').value.trim();
+        const desc  = document.getElementById('dish-desc').value.trim();
+        const price = document.getElementById('dish-price').value.trim();
+
+        if (!name) { showToast('Preenche o nome do prato.'); return; }
+
+        const newItem = {
+            id: 'dish_' + Date.now(),
+            name,
+            desc: desc || 'Prato especial da casa.',
+            price: price || 'Preço a consultar',
+            img: pendingDishImg || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=700'
+        };
+
+        MENU_ITEMS.push(newItem);
+        saveData('bomgosto_menu', MENU_ITEMS);
+        renderMenuGrid();
+        renderAdminMenuList();
+
+        // Reset form
+        document.getElementById('dish-name').value = '';
+        document.getElementById('dish-desc').value = '';
+        document.getElementById('dish-price').value = '';
+        document.getElementById('dish-img-preview').style.display = 'none';
+        pendingDishImg = '';
+        // Reset file input
+        const area = document.getElementById('dish-upload-area');
+        const input = area.querySelector('input[type="file"]');
+        if (input) input.value = '';
+
+        showToast('Prato adicionado ao cardápio!');
+    }
+
+    function removeDish(id) {
+        if (!adminLoggedIn) return;
+        MENU_ITEMS = MENU_ITEMS.filter(x => x.id !== id);
+        saveData('bomgosto_menu', MENU_ITEMS);
+        renderMenuGrid();
+        renderAdminMenuList();
+        showToast('Prato removido.');
+    }
+
+    /* ================================================================
+       IMAGEM PROMO (Home)
+    ================================================================ */
+    let pendingPromoImg = '';
+
+    function previewPromoImg(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            pendingPromoImg = ev.target.result;
+            const preview = document.getElementById('promo-img-preview');
+            preview.src = pendingPromoImg;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function applyPromoImg() {
+        if (!adminLoggedIn) return;
+        if (!pendingPromoImg) { showToast('Seleciona uma imagem primeiro.'); return; }
+        const pi = document.querySelector('.promo-img img');
+        if (pi) pi.src = pendingPromoImg;
+        saveData('bomgosto_promo_img', pendingPromoImg);
+        showToast('Imagem aplicada!');
+    }
+
+    function clearPromoImg() {
+        if (!adminLoggedIn) return;
+        const pi = document.querySelector('.promo-img img');
+        if (pi) pi.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=900';
+        localStorage.removeItem('bomgosto_promo_img');
+        document.getElementById('promo-img-preview').style.display = 'none';
+        pendingPromoImg = '';
+        showToast('Imagem reposta ao padrão.');
+    }
+
+    /* ================================================================
+       COR DO PAINEL ADMIN
+    ================================================================ */
+    function applyAdminAccentDirect(color) {
+        document.documentElement.style.setProperty('--admin-accent', color);
+        document.getElementById('cp-accent').value = color;
+        document.getElementById('cp-accent-val').textContent = color;
+    }
+
+    function setAdminAccent(color, dotEl) {
+        if (!adminLoggedIn) { showToast('Acesso restrito.'); return; }
+        applyAdminAccentDirect(color);
+        // Update selected dot
+        document.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('selected'));
+        if (dotEl) dotEl.classList.add('selected');
+        saveData('bomgosto_admin_accent', color);
+        showToast('Cor do painel alterada.');
+    }
+
+    /* ================================================================
+       ADMIN — LOGIN / PAINEL
+    ================================================================ */
+    let clickCount = 0, clickTimer = null;
+
+    function handleAdminTrigger() {
+        clickCount++;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+        if (clickCount >= 5) {
+            clickCount = 0;
+            adminLoggedIn ? openAdmin() : openAdminLogin();
+        }
+    }
+
+    document.getElementById('admin-trigger').addEventListener('click', handleAdminTrigger);
+    document.getElementById('footer-admin-trigger').addEventListener('click', handleAdminTrigger);
+
+    function openAdminLogin() {
+        const login = document.getElementById('admin-login');
+        login.classList.add('show');
+        setTimeout(() => document.getElementById('admin-pass').focus(), 100);
+    }
+
+    function closeAdminLogin() {
+        document.getElementById('admin-login').classList.remove('show');
+        document.getElementById('admin-pass').value = '';
+        document.getElementById('login-err').style.display = 'none';
+    }
+
+    function checkLogin() {
+        const pass = document.getElementById('admin-pass').value;
+        if (pass === ADMIN_PASS) {
+            adminLoggedIn = true;
+            closeAdminLogin();
+            openAdmin();
+            showToast('Bem-vindo ao painel Bom Gosto');
+        } else {
+            document.getElementById('login-err').style.display = 'block';
+            document.getElementById('admin-pass').value = '';
+            document.getElementById('admin-pass').focus();
+        }
+    }
+
+    function openAdmin() {
+        document.getElementById('admin-panel').classList.add('open');
+        document.getElementById('admin-overlay').classList.add('show');
+        document.body.classList.add('admin-active');
+        renderAdminMenuList();
+    }
+
+    function closeAdmin() {
+        document.getElementById('admin-panel').classList.remove('open');
+        document.getElementById('admin-overlay').classList.remove('show');
+    }
+
+    function logoutAdmin() {
+        adminLoggedIn = false;
+        document.body.classList.remove('admin-active');
+        closeAdmin();
+        showToast('Sessão encerrada.');
+    }
+
+    /* ================================================================
+       TOAST
+    ================================================================ */
+    let toastTimer;
+    function showToast(msg) {
+        const t = document.getElementById('ap-toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    /* ================================================================
+       INIT
+    ================================================================ */
+    loadSettings();
+    </script>
+</body>
+</html>
